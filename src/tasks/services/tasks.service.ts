@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTaskDto } from '../dtos/create-task-dto';
 import { GetTasksFilterDto } from '../dtos/get-tasks-filter-dto';
 import { PatchTaskDto } from '../dtos/patch-task-dto';
@@ -30,7 +34,15 @@ export class TasksService {
   }
 
   getOne(id: string): Task {
-    return this.tasks.find((t: Task) => t.id === id);
+    if (!id) {
+      throw new BadRequestException('Id is required');
+    }
+    const found = this.tasks.find((t: Task) => t.id === id);
+    if (!found) {
+      // use single quotes when performing string interpolation
+      throw new NotFoundException(`Item with id '${id}' does not exist!`);
+    }
+    return found;
   }
 
   create(createTaskDto: CreateTaskDto): Task {
@@ -70,6 +82,7 @@ export class TasksService {
   }
 
   delete(id: string): void {
-    this.tasks = this.tasks.filter((t: Task) => t.id !== id);
+    const task = this.getOne(id);
+    this.tasks = this.tasks.filter((t: Task) => t.id !== task.id);
   }
 }
