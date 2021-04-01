@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as helmet from 'helmet';
@@ -9,6 +9,10 @@ import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('bootstrap');
+  const port = 3000;
+
+  app.setGlobalPrefix('api');
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
@@ -28,6 +32,7 @@ async function bootstrap() {
       disableErrorMessages: false,
     }),
   );
-  await app.listen(3000);
+  await app.listen(port);
+  logger.debug(`App listening on port: ${port}`);
 }
 bootstrap();

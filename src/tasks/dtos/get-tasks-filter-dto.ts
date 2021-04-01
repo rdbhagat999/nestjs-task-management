@@ -5,7 +5,7 @@ import {
   IsString,
   IsUppercase,
 } from 'class-validator';
-import { TaskStatus } from '../interfaces/task.interface';
+import { TaskStatus } from '../models/task-status.enum';
 
 export class GetTasksFilterDto {
   @IsOptional()

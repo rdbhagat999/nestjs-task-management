@@ -2,10 +2,10 @@ import {
   IsDefined,
   IsEnum,
   IsNotEmpty,
-  IsString,
   IsUppercase,
+  IsString,
 } from 'class-validator';
-import { TaskStatus } from '../interfaces/task.interface';
+import { TaskStatus } from '../models/task-status.enum';
 export class PatchTaskDto {
   @IsDefined()
   @IsNotEmpty()
