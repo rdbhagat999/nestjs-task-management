@@ -9,6 +9,7 @@ import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());

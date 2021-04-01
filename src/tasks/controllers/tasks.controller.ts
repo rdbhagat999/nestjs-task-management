@@ -9,51 +9,70 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { User } from 'src/auth/models/user.entity';
 import { CreateTaskDto } from '../dtos/create-task-dto';
 import { GetTasksFilterDto } from '../dtos/get-tasks-filter-dto';
 import { PatchTaskDto } from '../dtos/patch-task-dto';
 import { UpdateTaskDto } from '../dtos/update-task-dto';
-import { ITask } from '../models/task.interface';
+import { Task } from '../models/task.entity';
 import { TasksService } from '../services/tasks.service';
 
+@UseGuards(AuthGuard())
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  getAll(@Query() getTasksFilterDto: GetTasksFilterDto): Promise<ITask[]> {
-    return this.tasksService.findAll(getTasksFilterDto);
+  getAll(
+    @GetUser() user: User,
+    @Query() getTasksFilterDto: GetTasksFilterDto,
+  ): Promise<Task[]> {
+    return this.tasksService.findAll(getTasksFilterDto, user);
   }
 
   @Get(':id')
-  findById(@Param('id', ParseIntPipe) id: number): Promise<ITask> {
-    return this.tasksService.findById(id);
+  findById(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Task> {
+    return this.tasksService.findById(id, user);
   }
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto): Promise<ITask> {
-    return this.tasksService.create(createTaskDto);
+  create(
+    @GetUser() user: User,
+    @Body() createTaskDto: CreateTaskDto,
+  ): Promise<Partial<Task>> {
+    return this.tasksService.create(createTaskDto, user);
   }
 
   @Patch(':id')
   patch(
+    @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Body() patchTaskDto: PatchTaskDto,
-  ): Promise<ITask> {
-    return this.tasksService.patch(id, patchTaskDto);
+  ): Promise<Task> {
+    return this.tasksService.patch(id, patchTaskDto, user);
   }
 
   @Put(':id')
   update(
+    @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
-  ): Promise<ITask> {
-    return this.tasksService.update(id, updateTaskDto);
+  ): Promise<Task> {
+    return this.tasksService.update(id, updateTaskDto, user);
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.tasksService.delete(id);
+  delete(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    return this.tasksService.delete(id, user);
   }
 }
