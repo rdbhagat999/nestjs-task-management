@@ -4,47 +4,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateTaskDto } from '../dtos/create-task-dto';
 import { GetTasksFilterDto } from '../dtos/get-tasks-filter-dto';
 import { PatchTaskDto } from '../dtos/patch-task-dto';
 import { UpdateTaskDto } from '../dtos/update-task-dto';
-import { TaskEntity } from '../models/task.entity';
+import { Task } from '../models/task.entity';
 import { ITask } from '../models/task.interface';
+import { TaskRepository } from '../repository/task.repository';
 
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectRepository(TaskEntity)
-    protected tasksRepository: Repository<TaskEntity>,
+    @InjectRepository(Task)
+    protected readonly tasksRepository: TaskRepository,
   ) {}
 
   async findAll(getTasksFilterDto: GetTasksFilterDto): Promise<ITask[]> {
-    const { status, search } = getTasksFilterDto;
-    const query = this.tasksRepository.createQueryBuilder('tasks');
-
-    if (status) {
-      query.andWhere('tasks.status = :status', { status });
-    }
-    if (search) {
-      query.andWhere(
-        '(tasks.title LIKE :search OR tasks.description LIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-
-    return await query.getMany();
+    return await this.tasksRepository.findAll(getTasksFilterDto);
   }
 
   async findById(id: number): Promise<ITask> {
-    if (!id) {
-      throw new BadRequestException(`Id is required`);
-    }
-    const found = await this.tasksRepository.findOne(id);
-    if (!found) {
-      throw new NotFoundException(`Item with id '${id}' not found!`);
-    }
-    return found;
+    return await this.tasksRepository.findById(id);
   }
 
   async findOne(condition: any): Promise<ITask> {
@@ -52,42 +32,18 @@ export class TasksService {
   }
 
   async create(createTaskDto: CreateTaskDto): Promise<ITask> {
-    const { title, description } = createTaskDto;
-    const item: Partial<ITask> = {
-      title,
-      description,
-    };
-    return await this.tasksRepository.save(item);
+    return await this.tasksRepository.createTask(createTaskDto);
   }
 
   async patch(id: number, patchTaskDto: PatchTaskDto): Promise<ITask> {
-    if (!id) {
-      throw new BadRequestException(`Id is required`);
-    }
-    const { status } = patchTaskDto;
-    const { affected } = await this.tasksRepository.update(id, { status });
-    if (affected < 1) {
-      throw new NotFoundException(`Item with id '${id}' not found!`);
-    }
-    return await this.findById(id);
+    return await this.tasksRepository.patchOne(id, patchTaskDto);
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<ITask> {
-    if (!id) {
-      throw new BadRequestException(`Id is required`);
-    }
-    const { affected } = await this.tasksRepository.update(id, updateTaskDto);
-    if (affected < 1) {
-      throw new NotFoundException(`Item with id '${id}' not found!`);
-    }
-    return await this.findById(id);
+    return await this.tasksRepository.updateOne(id, updateTaskDto);
   }
 
   async delete(id: number): Promise<void> {
-    const item = await this.findById(id);
-    const { affected } = await this.tasksRepository.delete(item.id);
-    if (affected < 1) {
-      throw new NotFoundException(`Item with id '${id}' not found!`);
-    }
+    return await this.tasksRepository.deleteById(id);
   }
 }

@@ -6,6 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { typeOrmConfig } from './config/typeorm.config';
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
     TasksModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
