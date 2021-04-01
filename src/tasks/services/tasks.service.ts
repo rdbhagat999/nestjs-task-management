@@ -1,21 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskDto } from '../dtos/create-task-dto';
 import { GetTasksFilterDto } from '../dtos/get-tasks-filter-dto';
 import { PatchTaskDto } from '../dtos/patch-task-dto';
 import { UpdateTaskDto } from '../dtos/update-task-dto';
-import { Task } from '../models/task.entity';
 import { ITask } from '../models/task.interface';
 import { TaskRepository } from '../repository/task.repository';
 
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectRepository(Task)
+    @InjectRepository(TaskRepository)
     protected readonly tasksRepository: TaskRepository,
   ) {}
 
