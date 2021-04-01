@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -24,6 +25,8 @@ import { TasksService } from '../services/tasks.service';
 @UseGuards(AuthGuard())
 @Controller('tasks')
 export class TasksController {
+  private readonly logger = new Logger('TasksController');
+
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
@@ -31,6 +34,11 @@ export class TasksController {
     @GetUser() user: User,
     @Query() getTasksFilterDto: GetTasksFilterDto,
   ): Promise<Task[]> {
+    this.logger.verbose(
+      `User ${user.username} retrieving all tasks with filters ${JSON.stringify(
+        getTasksFilterDto,
+      )}`,
+    );
     return this.tasksService.findAll(getTasksFilterDto, user);
   }
 
@@ -47,6 +55,11 @@ export class TasksController {
     @GetUser() user: User,
     @Body() createTaskDto: CreateTaskDto,
   ): Promise<Partial<Task>> {
+    this.logger.verbose(
+      `User ${user.username} creating task with data ${JSON.stringify(
+        CreateTaskDto,
+      )}`,
+    );
     return this.tasksService.create(createTaskDto, user);
   }
 
@@ -73,6 +86,9 @@ export class TasksController {
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
+    this.logger.verbose(
+      `User ${user.username} deleting task with id ${JSON.stringify(id)}`,
+    );
     return this.tasksService.delete(id, user);
   }
 }

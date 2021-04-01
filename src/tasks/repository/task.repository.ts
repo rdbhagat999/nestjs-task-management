@@ -1,4 +1,9 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from 'src/auth/models/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { CreateTaskDto } from '../dtos/create-task-dto';
@@ -9,6 +14,8 @@ import { Task } from '../models/task.entity';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
+  private readonly logger = new Logger('TaskRepository');
+
   async findAll(
     getTasksFilterDto: GetTasksFilterDto,
     user: User,
@@ -28,7 +35,12 @@ export class TaskRepository extends Repository<Task> {
       );
     }
 
-    return await query.getMany();
+    try {
+      return await query.getMany();
+    } catch ({ message, stack }) {
+      this.logger.error(message, stack);
+      throw new InternalServerErrorException();
+    }
   }
 
   async findById(id: number, user: User): Promise<Task> {
