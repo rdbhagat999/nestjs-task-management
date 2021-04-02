@@ -8,16 +8,19 @@ import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { JwtStrategy } from './models/jwt-strategy';
 import { UserRepository } from './repository/user.repository';
 import { AuthService } from './services/auth.service';
+import * as CONFIG from 'config';
 
+const { secret, expiresIn } = CONFIG.get('jwt');
+const { JWT_SECRET } = process.env;
 @Module({
   imports: [
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
     JwtModule.register({
-      secret: 'secret',
+      secret: JWT_SECRET || secret,
       signOptions: {
-        expiresIn: '1h',
+        expiresIn,
       },
     }),
     TypeOrmModule.forFeature([UserRepository]),
